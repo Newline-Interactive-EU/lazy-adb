@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 venv/
 Lazy-ADB*.md
+newline
 
 resources/platform-tools/linux/*
 !resources/platform-tools/linux/.gitkeep
