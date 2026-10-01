@@ -4,17 +4,28 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+concurrency:
+  # Serialize version calculation so two quick code pushes cannot select the
+  # same next patch number.
+  group: lazy-adb-mirror-and-release-tags
+  cancel-in-progress: false
 
 jobs:
   mirror-main:
     if: github.repository == 'darkone0112/lazy-adb'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Start ssh-agent and load mirror key
@@ -31,6 +42,37 @@ jobs:
         run: |
           git remote add org-mirror git@github.com:Newline-Interactive-EU/lazy-adb.git
 
-      - name: Push only main
+      - name: Mirror main and publish the next code-release tag
+        env:
+          PUSH_BEFORE: ${{ github.event.before }}
         run: |
-          git push org-mirror main:main
+          git push org-mirror refs/remotes/origin/main:refs/heads/main
+
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            git push org-mirror "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
+            exit 0
+          fi
+
+          # Manual mirror runs do not create releases. A release is created only
+          # for a push to main that changed the shipped application.
+          if [ "$GITHUB_EVENT_NAME" != "push" ] || [ -z "$PUSH_BEFORE" ]; then
+            exit 0
+          fi
+
+          if git diff --quiet "$PUSH_BEFORE" "$GITHUB_SHA" -- \
+            main.py core ui utils resources android-logo.ico requirements.txt pyproject.toml; then
+            exit 0
+          fi
+
+          latest_tag=$(git tag --list | awk '/^v[0-9]+\.[0-9]+\.[0-9]+$/' | sort -V | tail -n 1)
+          if [ -z "$latest_tag" ]; then
+            release_tag="v0.1.0"
+          else
+            version=${latest_tag#v}
+            IFS=. read -r major minor patch <<< "$version"
+            release_tag="v$major.$minor.$((patch + 1))"
+          fi
+
+          git tag -a "$release_tag" -m "Automated release $release_tag"
+          git push origin "refs/tags/$release_tag:refs/tags/$release_tag"
+          git push org-mirror "refs/tags/$release_tag:refs/tags/$release_tag"

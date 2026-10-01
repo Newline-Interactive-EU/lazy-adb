@@ -346,7 +346,7 @@ pip install pyinstaller
 Run this exact command to build the portable `.exe` folder:
 
 ```powershell
-.\venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --windowed --onedir --name "Lazy ADB Wizard" --icon "lazy-adb-wizard.ico" --add-data "android-logo.ico;." --add-data "resources;resources" --add-data "output;output" main.py
+.\venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --windowed --onedir --name "Lazy ADB Wizard" --icon "android-logo.ico" --add-data "android-logo.ico;." --add-data "resources;resources" --add-data "output;output" main.py
 ```
 
 ### What The Important Flags Do
@@ -378,6 +378,28 @@ Then the other person:
 
 1. extracts the zip
 2. opens `Lazy ADB Wizard.exe`
+
+### Automatic GitHub Releases
+
+When a change to application code, build dependencies, or packaged resources is
+pushed to `main`, the mirror creates the next patch version tag in both
+repositories (`v0.1.0`, then `v0.1.1`, and so on). The organization repository
+then automatically builds a Windows bundle and publishes the GitHub Release for
+that tag.
+
+To publish a named version release instead, push an annotated version tag from
+the personal repository after its `main` branch contains the release commit:
+
+```powershell
+git tag -a v0.1.0 -m "v0.1.0"
+git push origin v0.1.0
+```
+
+The mirror workflow copies the version tag to
+`Newline-Interactive-EU/lazy-adb`. Its Windows release workflow builds the ZIP
+and attaches it to the GitHub Release for that tag. Only tags beginning with
+`v` trigger named version releases. The release workflow can also be run
+manually in the organization repository for an existing tag.
 
 ### Include Platform-Tools Or Not
 

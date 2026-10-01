@@ -31,6 +31,8 @@ def main() -> int:
     from ui.main_window import MainWindow
 
     app = QApplication(sys.argv)
+    app.setApplicationName("Lazy ADB Wizard")
+    app.setApplicationDisplayName("Lazy ADB Wizard")
     icon_path = _find_app_icon()
     if icon_path is not None:
         app_icon = QIcon(str(icon_path))
