@@ -45,6 +45,7 @@ jobs:
       - name: Mirror main and publish the next code-release tag
         env:
           PUSH_BEFORE: ${{ github.event.before }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git push org-mirror refs/remotes/origin/main:refs/heads/main
 
@@ -65,12 +66,20 @@ jobs:
             exit 0
           fi
 
-          latest_tag=$(git tag --list | awk '/^v[0-9]+\.[0-9]+\.[0-9]+$/' | sort -V | tail -n 1)
-          if [ -z "$latest_tag" ]; then
+          # Older releases may have a non-semantic tag (for example, "latest")
+          # but a semantic release title. Include both tags and release titles
+          # when selecting the next version.
+          latest_version=$(
+            {
+              git tag --list
+              gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+                --jq '.[] | .tag_name, .name' || true
+            } | sed 's/^v//' | awk '/^[0-9]+\.[0-9]+\.[0-9]+$/' | sort -V | tail -n 1
+          )
+          if [ -z "$latest_version" ]; then
             release_tag="v0.1.0"
           else
-            version=${latest_tag#v}
-            IFS=. read -r major minor patch <<< "$version"
+            IFS=. read -r major minor patch <<< "$latest_version"
             release_tag="v$major.$minor.$((patch + 1))"
           fi
 

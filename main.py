@@ -25,7 +25,7 @@ def main() -> int:
     except ImportError as exc:
         raise SystemExit(
             "PySide6 is not installed. Install project dependencies first, "
-            "for example with `python3 -m pip install -e .`."
+            "for example with `python -m pip install -e .`."
         ) from exc
 
     from ui.main_window import MainWindow

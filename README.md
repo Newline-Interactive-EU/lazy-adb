@@ -385,7 +385,8 @@ When a change to application code, build configuration, dependencies, or
 packaged resources is pushed to `main`, the mirror creates the next patch version tag in both
 repositories (`v0.1.0`, then `v0.1.1`, and so on). The organization repository
 then automatically builds a Windows bundle and publishes the GitHub Release for
-that tag.
+that tag. The next version is calculated from the highest semantic tag or
+GitHub Release title already present in the personal repository.
 
 To publish a named version release instead, push an annotated version tag from
 the personal repository after its `main` branch contains the release commit:
