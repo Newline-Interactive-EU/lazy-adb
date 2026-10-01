@@ -60,7 +60,8 @@ jobs:
           fi
 
           if git diff --quiet "$PUSH_BEFORE" "$GITHUB_SHA" -- \
-            main.py core ui utils resources android-logo.ico requirements.txt pyproject.toml; then
+            main.py core ui utils resources android-logo.ico requirements.txt pyproject.toml \
+            .github/workflows/mirror-main-to-org.yml .github/workflows/release-windows.yml; then
             exit 0
           fi
 
@@ -73,6 +74,8 @@ jobs:
             release_tag="v$major.$minor.$((patch + 1))"
           fi
 
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$release_tag" -m "Automated release $release_tag"
           git push origin "refs/tags/$release_tag:refs/tags/$release_tag"
           git push org-mirror "refs/tags/$release_tag:refs/tags/$release_tag"

@@ -381,8 +381,8 @@ Then the other person:
 
 ### Automatic GitHub Releases
 
-When a change to application code, build dependencies, or packaged resources is
-pushed to `main`, the mirror creates the next patch version tag in both
+When a change to application code, build configuration, dependencies, or
+packaged resources is pushed to `main`, the mirror creates the next patch version tag in both
 repositories (`v0.1.0`, then `v0.1.1`, and so on). The organization repository
 then automatically builds a Windows bundle and publishes the GitHub Release for
 that tag.
