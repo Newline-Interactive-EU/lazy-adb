@@ -16,9 +16,6 @@ permissions:
 
 jobs:
   release:
-    # This file is mirrored from the personal repository. Only the organization
-    # repository publishes customer-facing release assets.
-    if: github.repository == 'Newline-Interactive-EU/lazy-adb'
     runs-on: windows-latest
 
     steps:
@@ -58,12 +55,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
-          RELEASE_SHA: ${{ github.sha }}
           BUNDLE: ${{ steps.package.outputs.bundle }}
         run: |
           gh release view $env:RELEASE_TAG 2>$null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $env:RELEASE_TAG $env:BUNDLE --clobber
+            gh release edit $env:RELEASE_TAG --latest
           } else {
-            gh release create $env:RELEASE_TAG $env:BUNDLE --target $env:RELEASE_SHA --title $env:RELEASE_TAG --generate-notes
+            gh release create $env:RELEASE_TAG $env:BUNDLE --verify-tag --latest --title $env:RELEASE_TAG --generate-notes
           }

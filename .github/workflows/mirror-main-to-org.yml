@@ -19,6 +19,7 @@ jobs:
     if: github.repository == 'darkone0112/lazy-adb'
     runs-on: ubuntu-latest
     permissions:
+      actions: write
       contents: write
 
     steps:
@@ -87,4 +88,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$release_tag" -m "Automated release $release_tag"
           git push origin "refs/tags/$release_tag:refs/tags/$release_tag"
+          gh workflow run release-windows.yml --ref main --field "tag=$release_tag"
           git push org-mirror "refs/tags/$release_tag:refs/tags/$release_tag"
